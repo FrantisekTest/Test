@@ -9,17 +9,28 @@ Notes related resources of the **Notes API**
 
 ## Notes Collection [/notes]
 
-### List all Notes [GET]
+### List all Notes [GET]ss
 
 **IMPLEMENTED**
 
 + Response 200 (application/json)
+    
+    + Headers
+        
+        ```
+        X.H: Test
+        ```
 
+        
+    + Body
+        
+        ```
         [{
           "id": 1, "title": "Jogging in park"
         }, {
           "id": 2, "title": "Pick-up posters from post-office"
         }]
+        ```
 
 ### Create a Note [POST]
 
