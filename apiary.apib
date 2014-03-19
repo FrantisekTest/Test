@@ -1,40 +1,23 @@
 FORMAT: 1A
 HOST: http://www.google.com
 
-# Testt
-Notes API issss a *short texts saving* service similar to its physical paper presence on your table.
+# Test
+Notes API is a *short texts saving* service similar to its physical paper presence on your table.
 
 # Group Notes
 Notes related resources of the **Notes API**
 
 ## Notes Collection [/notes]
-
 ### List all Notes [GET]
-
-**IMPLEMENTED**
-
 + Response 200 (application/json)
-    
-    + Headers
-        
-        ```
-        X-H: Test
-        ```
-        
-    + Body
-        
-        ```
+
         [{
           "id": 1, "title": "Jogging in park"
         }, {
           "id": 2, "title": "Pick-up posters from post-office"
         }]
-        ```
 
 ### Create a Note [POST]
-
-**TESTED**
-
 + Request (application/json)
 
         { "title": "Buy cheese and bread for breakfast." }
@@ -47,7 +30,7 @@ Notes related resources of the **Notes API**
 A single Note object with all its details
 
 + Parameters
-    + id = `asda` (required, number, `1`) ... Numeric `id` of the Note to perform action with. Has example value.
+    + id (required, number, `1`) ... Numeric `id` of the Note to perform action with. Has example value.
 
 ### Retrieve a Note [GET]
 + Response 200 (application/json)
