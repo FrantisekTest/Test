@@ -1,394 +1,47 @@
 FORMAT: 1A
+HOST: http://www.google.com
 
-# Jeffs v3 WAF Network Lists
+# test
+Notes API is a *short texts saving* service similar to its physical paper presence on your table.
 
+# Group Notes
+Notes related resources of the **Notes API**
 
----
-The goal of the Network List APIs is to allow users to provide firewall block and allow lists
-to be applied at the Akamai edge.
-Requests from the public internet that match these lists may be blocked or explicitly
-allowed through the firewall.
-In this way, the user can dynamically customize the filtering done by the Akamai network
-protecting the origins.
-
-A network list includes either IP- or geo-based data for use as a basis
-for firewall protection. Network Lists also define data intended as block and allow
-lists that either enable the blocking of a set of IP addresses and/or IP address CIDR
-blocks (for example 192.168.234.0/24, representing 192.168.234.0–
-192.168.234.255) or geographic regions with an exception allow-list to override the
-block list, or enable an allow-only mode, denying everything but the allow-list.
-
-The current design provides for the upload of a new Network List with a named reference
-handle. API list operations are agnostic with regard to the list’s nature (allow or
-block), as this association is made when the list is linked to a Firewall Policy using the
-Akamai® Luna Control Center™ interface. The API provides list manipulation, allowing
-for operations on individual list entries, appending of sets of list entries, or operations
-on the entire list, where bulk deletion can be effected.
-
-List operations that apply to an entire list require the list to be uploaded in its
-entirety, resulting in either a success if no synchronization conflicts occur, or an error
--- retry paradigm, with the caller being provided a fresh list. Rate limiting considerations
-govern operations on individual list entries, while size and deletion requirements
-govern usage of list append operations.
-
-Network List activations result in implementations of updates to all Firewall Policies
-subscribed to the Network List.
-
-Expected API usage may involve multiple asynchronous client
-updates to a single named Network List. Concurrent interaction with the API by
-multiple API clients is cause for concern. In instances where PUTS seek to replace a
-stale list (one based on an old sync point), the client call will fail with a message to
-retry with a newly provided list.
-
-# Group Firewall Rules
-
-# Firewall Rule [/firewall_rule/v1/rule/{rule_id,name,operation,sync_point,addresses}]
-
-The firewall rule is the primary object of the API.
-
-A single firewall rule has properties:
-
-- a **rule_id**
-- a human readable **name**
-- an **operation**: `allow` or `deny`
-- an activation state
-- a **sync_point**
-    - read / update sequences are not idempotent, and must be coordinated via sync points.
-- a list of addresses to operate on; one of:
-    - IP addresses
-        - an IP address may specify one of:
-            - an IPv4 address, eg `192.168.1.1`
-            - an IPv4 CIDR, eg `192.168.1.1/24`
-    - Geo locations
-        - a geo location is one of a set of geo location names returned by the AKAM *XXX: fill this in*
-
-The **rule_id** is returned when a rule is created.
-
-A firewall rule may be shared across multiple digital properties.
-
-+ Parameters
-    + rule_id (required, string)
-    + name (optional, string)
-    + operation (optional, string, `allow`)
-    + addresses (optional, json)
-        A possibly empty list formatted as json.  All elements of a single list must be of the same type.  Each element may be one of:
-
-        - an IPv4 address, eg `192.168.1.1`
-        - an IPv4 CIDR, eg `192.168.1.1/24`
-        - a geo location
-        
-        Lorem ispum.
-
-
-## Read a firewall rule [GET]
-
+## Notes Collection [/notes]
+### List all Notes [GET]
 + Response 200 (application/json)
 
-    + Body
+        [{
+          "id": 1, "title": "Jogging in park"
+        }, {
+          "id": 2, "title": "Pick-up posters from post-office"
+        }]
 
-            {
-               "name": "Simple List",
-               "type": "IP",
-               "unique-id": "345_BOTLIST",
-               "links": [   {
-                  "rel": "get 345_BOTLIST",
-                  "href": "/config-waf-network-list/v1/network_lists/345_BOTLIST"
-               }],
-               "list":    [
-                  "192.168.0.1",
-                  "192.168.0.2",
-                  "192.168.0.3",
-                  "198.168.0.4",
-                  "198.168.0.5",
-                  "198.168.0.6"
-               ],
-               "sync_point": 1,
-               "numEntries": 6
-            }
+### Create a Note [POST]
++ Request (application/json)
 
-
-## Update a firewall rule [PUT]
-
-+ Response 200 (application/json)
-
-    + Body
-
-            {
-               "status": 200,
-               "unique-id": "345_BOTLIST",
-               "links": [   {
-                  "rel": "get 345_BOTLIST",
-                  "href": "/config-waf-network-list/v1/network_lists/345_BOTLIST"
-               }],
-               "sync_point": 1
-            }
-
-
-# Network Lists [/v1/network_lists]
-
-## List all configured Network Lists for the authenticated user [GET]
-
-GET /v1/network_lists{?listType,extended,includeDeprecated,includeElements}
-
-+ Response 200 (application/json)
-
-    + Body
-
-        {"network_lists": [
-              {
-              "name": "test",
-              "type": "IP",
-              "links": [      {
-                 "rel": "get 123_TEST",
-                 "href": "/config-waf-network-list/v1/network_lists/123_TEST"
-              }],
-              "unique-id": "123_TEST",
-              "list": ["1.2.3.4", "5.6.7.8"],
-              "sync_point": 1,
-              "numEntries": 2
-           }
-        ]}
-
-### Create a new Network List [POST]
-
-POST /v1/network_lists
+        { "title": "Buy cheese and bread for breakfast." }
 
 + Response 201 (application/json)
 
-    + Headers
+        { "id": 3, "title": "Buy cheese and bread for breakfast." }
 
-        X-ECWS-ACG: ACG_ID
+## Note [/notes/{id}]
+A single Note object with all its details
+
++ Parameters
+    + id (required, number, `1`) ... Numeric `id` of the Note to perform action with. Has example value.
+
+### Retrieve a Note [GET]
++ Response 200 (application/json)
+
+    + Header
+
+            X-My-Header: The Value
 
     + Body
 
-        {
-        "name": "botlist",
-        "type": "IP",
-        "list": ["201.22.44.12","8.7.6.0/24"]
-        }
-        {
-           "status": 201,
-           "unique-id": "345_BOTLIST",
-           "links": [   {
-              "rel": "get 345_BOTLIST",
-              "href": "/config-waf-network-list/v1/network_lists/345_BOTLIST"
-           }],
-           "sync_point": 0
-        }
+            { "id": 2, "title": "Pick-up posters from post-office" }
 
-
-Updates a Network List
-PUT /v1/network_lists/{unique-id}{?extended}
-> Content-Type: application/json
-{
-   "name": "Simple List",
-   "type": "IP",
-   "unique-id": "345_BOTLIST",
-   "list":    [
-      "192.168.0.1",
-      "192.168.0.2",
-      "192.168.0.3",
-      "198.168.0.4",
-      "198.168.0.5",
-      "198.168.0.6"
-   ],
-   "sync_point": 0
-}
-< 200
-< Content-Type: application/json
-{
-   "status": 200,
-   "unique-id": "345_BOTLIST",
-   "links": [   {
-      "rel": "get 345_BOTLIST",
-      "href": "/config-waf-network-list/v1/network_lists/345_BOTLIST"
-   }],
-   "sync_point": 1
-}
-
-Gets Network List
-GET /v1/network_lists/{unique-id}{?extended}
-> Accept: application/json
-< 200
-< Content-Type: application/json
-{
-   "name": "Simple List",
-   "type": "IP",
-   "unique-id": "345_BOTLIST",
-   "links": [   {
-      "rel": "get 345_BOTLIST",
-      "href": "/config-waf-network-list/v1/network_lists/345_BOTLIST"
-   }],
-   "list":    [
-      "192.168.0.1",
-      "192.168.0.2",
-      "192.168.0.3",
-      "198.168.0.4",
-      "198.168.0.5",
-      "198.168.0.6"
-   ],
-   "sync_point": 1,
-   "numEntries": 6
-}
-
-Appends a set of IP adddresses or geo locations to a list
-POST /v1/network_lists/{unique-id}
-> Content-Type: application/json
-{
-   "list":    [
-      "192.168.0.7",
-      "192.168.0.8",
-      "192.168.0.9"
-   ]
-}
-< 202
-< Content-Type: application/json
-{
-   "message": "Elements successfully appended to the list",
-   "status": 202,
-   "links": []
-}
-
-Adds the specified element to the list
-PUT /v1/network_lists/{unique-id}/element{?element}
-> Content-Type: application/json
-< 201
-< Content-Type: application/json
-{
-   "message": "Element 1.2.3.4 successfully added to list",
-   "status": 201,
-   "links": []
-}
-
-Deletes the specified element from the list
-DELETE /v1/network_lists/{unique-id}/element{?element}
-< 200
-< Content-Type: application/json
-{
-   "message": "Element 1.2.3.4 successfully deleted from list",
-   "status": 200,
-   "links": []
-}
-
-Activates the Network List
-POST /v1/network_lists/{unique-id}/activate{?env}
-> Content-Type: application/json
-{
- "siebel-ticket-id" : "ABC",
- "notification-recipients" : ["nomail@akamai.com"],
- "comments" : "Activation"
-}
-< 200
-< Content-Type: application/json
-{
-   "status": 200,
-   "unique-id": "345_BOTLIST",
-   "links": [],
-   "sync_point": 1,
-   "activation-status": "PENDING_ACTIVATION"
-}
-
-Retrieves the list's activation status
-GET /v1/network_lists/{unique-id}/status{?env}
-> Accept: application/json
-< 200
-< Content-Type: application/json
-{
-   "status": 200,
-   "unique-id": "345_BOTLIST",
-   "links": [],
-   "sync_point": 1,
-   "activation-status": "PENDING_ACTIVATION",
-   "activation-comments": "Activation"
-}
-
-Retrieves a snapshot of a Network List at the moment of its activation
-GET /v1/network_lists/{unique-id}/history{?sync_point,extended}
-> Accept: application/json
-< 200
-< Content-Type: application/json
-{
-   "name": "Simple List",
-   "type": "IP",
-   "unique-id": "345_BOTLIST",
-   "links": [   {
-      "rel": "get 345_BOTLIST",
-      "href": "/config-waf-network-list/v1/network_lists/345_BOTLIST"
-   }],
-   "list":    [
-      "192.168.0.1",
-      "192.168.0.2",
-      "192.168.0.3",
-      "198.168.0.4",
-      "198.168.0.5",
-      "198.168.0.6"
-   ],
-   "sync_point": 1
-}
-
-
-Retrieves a list of all Network Lists having elements containing the search terms. Each Network List’s status is also provided.
-GET /v1/network_lists/search{?expression,listType,extended,includeDeprecated} 
-> Accept: application/json
-< 200
-< Content-Type: application/json
-{
-   "createEpoch": 1377894266,
-   "updateEpoch": 1378409797,
-   "stagingActivationStatus": "INACTIVE",
-   "productionActivationStatus": "PENDING_ACTIVATION",
-   "createdBy": "user",
-   "createDate": 1377894266623,
-   "updatedBy": "user",
-   "updateDate": 1378409797687,
-   "name": "Simple List",
-   "type": "IP",
-   "unique-id": "345_BOTLIST",
-   "links": [   {
-      "rel": "get 345_BOTLIST",
-      "href": "/config-waf-network-list/v1/network_lists/345_BOTLIST"
-   }],
-   "list":    [
-      "192.168.0.1",
-      "192.168.0.2",
-      "192.168.0.3",
-      "198.168.0.4",
-      "198.168.0.5",
-      "198.168.0.6"
-   ],
-   "sync_point": 1
-}
-
-Shares a Network List with the specified accounts
-POST /v1/network_lists/{unique-id}/share
-> Content-Type: application/json
-{
- "shareWithAll" : false,
- "accounts" : ["ACCOUNT_ID"],
- "acgs" : ["ACG_ID"]
-}
-< 200
-< Content-Type: application/json
-{
-   "message": "The list shares were created successfully",
-   "status": 200,
-   "links": []
-}
-
-Returns a list of account IDs with which the specified Network List is shared, or returns the keyword ALL if the list is shared with all accounts
-GET /v1/network_lists/{unique-id}/share
-> Accept: application/json
-< 200
-< Content-Type: application/json
-{
-   "accounts": [   {
-      "name": "Account name",
-      "accountId": "ACCOUNT_ID"
-   }],
-   "acgs":    [
-         {
-      "name": "ACG name",
-      "acgId": "ACG_ID"
-   }],
-   "sharedWithAll": true
-}
+### Remove a Note [DELETE]
++ Response 204
